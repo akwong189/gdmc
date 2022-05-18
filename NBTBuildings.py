@@ -1,27 +1,12 @@
 from nbt import nbt
 from enum import Enum
 
-
-
-from random import randint
-
-from gdpc import geometry as GEO
-from gdpc import interface as INTF
-from gdpc import toolbox as TB
-from gdpc import worldLoader as WL
-STARTX, STARTY, STARTZ, ENDX, ENDY, ENDZ = INTF.requestBuildArea()  # BUILDAREA
-
-WORLDSLICE = WL.WorldSlice(STARTX, STARTZ,
-                           ENDX + 1, ENDZ + 1)  # this takes a while
-
-ROADHEIGHT = 0
-
 class NBTBuildings:
     def __init__(self, nbt_path: str):
         self.nbt = nbt.NBTFile(nbt_path, 'rb')
         self.pallete = self._retrieve_pallete()
         self.blocks = self._retrieve_blocks()
-        self.size = self._get_size()
+        self.x, self.y, self.z = self.get_size()
         
     class Cardinals(Enum):
         NORTH=1
@@ -70,13 +55,21 @@ class NBTBuildings:
         size = self.nbt["size"]
         return size[0].value, size[1].value, size[2].value
     
-    def place_structure(self, intf: INTF, x: int, y: int, z: int, direction: Cardinals):
+    def place_structure(self, intf, x: int, y: int, z: int, direction: Cardinals):
         for d in self.blocks:
             _x, _y, _z = d["location"]
-            intf.placeBlock(x + _x, y + _y + 128, z + _z, d["block"])
+            intf.placeBlock(x + _x, y + _y, z + _z, d["block"])
         
         
 if __name__ == "__main__":
+    from gdpc import interface as INTF
+    from gdpc import worldLoader as WL
+    STARTX, STARTY, STARTZ, ENDX, ENDY, ENDZ = INTF.requestBuildArea()  # BUILDAREA
+
+    WORLDSLICE = WL.WorldSlice(STARTX, STARTZ,
+                            ENDX + 1, ENDZ + 1)  # this takes a while
+
+    ROADHEIGHT = 0
     heights = WORLDSLICE.heightmaps["MOTION_BLOCKING_NO_LEAVES"]
     
     house = NBTBuildings("./villages/plains/houses/plains_small_house_2.nbt")
