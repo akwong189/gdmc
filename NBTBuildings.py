@@ -1,18 +1,24 @@
 from nbt import nbt
 from enum import Enum
+import numpy as np
+
+class Cardinals(Enum):
+    WEST=0
+    NORTH=1
+    EAST=2
+    SOUTH=3
+
+VALS = {0: "west", 1: "north", 2: "east", 3: "south"}
 
 class NBTBuildings:
     def __init__(self, nbt_path: str):
         self.nbt = nbt.NBTFile(nbt_path, 'rb')
         self.pallete = self._retrieve_pallete()
-        self.blocks = self._retrieve_blocks()
+        self.structure_3d = np.ndarray(shape=(self.get_size()), dtype=object)
         self.x, self.y, self.z = self.get_size()
         
-    class Cardinals(Enum):
-        NORTH=1
-        EAST=2
-        SOUTH=3
-        WEST=4
+        self._retrieve_blocks()
+        
         
     def _retrieve_pallete(self):
         block_map = {}
@@ -30,9 +36,7 @@ class NBTBuildings:
             i += 1
         return block_map
         
-    def _retrieve_blocks(self):    
-        block_loc = []
-        
+    def _retrieve_blocks(self):  
         for b in self.nbt["blocks"]:
             pos = b['pos']
             x, y, z = pos[0].value, pos[1].value, pos[2].value
@@ -43,22 +47,48 @@ class NBTBuildings:
             else:
                 block = self.pallete[block_id]
             
-            if block != "air":
-                block_data = {"location": (x, y, z), "block": block}
-                block_loc.append(block_data)
-        return block_loc
+            self.structure_3d[x, y, z] = block
+            
+    def _replace_facing(self, data, direction: Cardinals):
+        new_facing = ""
+        facing = ""
+        if "west" in data:
+            facing = "west"
+            new_facing = VALS[direction.value]
+        elif "north" in data:
+            facing = "north"
+            new_facing = VALS[(direction.value + 1) % 4]
+        elif "east" in data:
+            facing = "east"
+            new_facing = VALS[(direction.value + 2) % 4]
+        else: # south
+            facing = "south"
+            new_facing = VALS[(direction.value + 3) % 4]
+        return data.replace(facing, new_facing)
     
-    def _cardinal_location(self, location, direction):
-        size = self.get_size()
+    def _cardinal_location(self, direction: Cardinals):
+        if direction == Cardinals.NORTH:
+            return np.rot90(self.structure_3d, 1, axes=[0, 2])
+        if direction == Cardinals.SOUTH:
+            return np.rot90(self.structure_3d, 3, axes=[0, 2])
+        if direction == Cardinals.EAST:
+            return np.rot90(self.structure_3d, 2, axes=[0, 2])
+        return self.structure_3d
     
     def get_size(self):
         size = self.nbt["size"]
         return size[0].value, size[1].value, size[2].value
     
-    def place_structure(self, intf, x: int, y: int, z: int, direction: Cardinals):
-        for d in self.blocks:
-            _x, _y, _z = d["location"]
-            intf.placeBlock(x + _x, y + _y, z + _z, d["block"])
+    def place_structure(self, intf, x: int, y: int, z: int, direction: Cardinals=Cardinals.WEST):
+        structure = self._cardinal_location(direction=direction)
+        it =  np.nditer(structure, flags=['multi_index', "refs_ok"])
+        for d in it:
+            _x, _y, _z = it.multi_index
+            data = str(d)
+            if "facing" in data:
+                data = self._replace_facing(data, direction)
+            
+            intf.placeBlock(x + _x, y + _y, z + _z, data)
         
         
 if __name__ == "__main__":
@@ -73,4 +103,4 @@ if __name__ == "__main__":
     heights = WORLDSLICE.heightmaps["MOTION_BLOCKING_NO_LEAVES"]
     
     house = NBTBuildings("./villages/plains/houses/plains_small_house_2.nbt")
-    house.place_structure(INTF, STARTX, STARTY, STARTZ, NBTBuildings.Cardinals.NORTH)
+    house.place_structure(INTF, STARTX, STARTY, STARTZ, Cardinals.NORTH)

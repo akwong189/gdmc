@@ -1,5 +1,5 @@
 import numpy as np
-from NBTBuildings import NBTBuildings
+from NBTBuildings import NBTBuildings, Cardinals
 
 from gdpc import geometry as GEO
 from gdpc import interface as INTF
@@ -33,7 +33,7 @@ for x in range(x_max):
         ):
             print(f"Building house at {x},{location.min()},{z}")
             house.place_structure(
-                INTF, x, location.min(), z, NBTBuildings.Cardinals.NORTH
+                INTF, x, location.min(), z, Cardinals.NORTH
             )
             #     x += h_x
             #     z += h_z
