@@ -1,13 +1,16 @@
 from PIL import Image
 import numpy as np
+from gdpc import interface as INTF
 
 PX_SIZE = 4
 
 COLOR_VALUES = {
-    1: (100, 0, 0), # building
+    1: (235, 235, 83), # building
     2: (108, 207, 255), # water
     3: (114, 64, 31), # path
-    4: (247, 112, 22) # lava
+    4: (247, 112, 22), # lava
+    5: (100, 0, 0), # do not build zone
+    6: (47, 249, 148), # do not build zone for lamps/roads
 }
 
 def draw_pixel(img, x1, z1, x2, z2, color):
@@ -57,7 +60,7 @@ def generate_mask(x1, z1, x2, z2, height):
     
     for x in range(x2 - x1):
         for z in range(z2 - z1):
-            block = INTF.getBlock(x, heights[x,z]-1, z)
+            block = INTF.getBlock(x, height[x,z]-1, z)
             if block == "minecraft:water":
                 mask[x1+x,z1+z] = 2
             elif block == "minecraft:lava":
@@ -65,7 +68,6 @@ def generate_mask(x1, z1, x2, z2, height):
     return mask
 
 if __name__ == "__main__":
-    from gdpc import interface as INTF
     from gdpc import toolbox as TB
     from gdpc import worldLoader as WL
     

@@ -1,5 +1,6 @@
 from nbt import nbt
 from enum import Enum
+import numpy as np
 
 class Cardinals(Enum):
     NORTH=1
@@ -83,7 +84,7 @@ def place_structure(nbt_path: str, x: int, y: int, z: int, direction: Cardinals)
     return block_loc
 
 if __name__ == "__main__":
-    blocks = place_structure("./simple_house.nbt", 0, 0, 0, Cardinals.NORTH)
+    blocks = place_structure("./villages/plains/houses/plains_big_house_1.nbt", 0, 0, 0, Cardinals.NORTH)
 
     heights = WORLDSLICE.heightmaps["MOTION_BLOCKING_NO_LEAVES"]
     print(STARTX, STARTY + 128, STARTZ)
@@ -101,9 +102,9 @@ if __name__ == "__main__":
     z = 2
     #start_block = (11, 67, 32)
 
-    mask = np.zeros(shape=height.shape)
+    mask = np.zeros(shape=heights.shape)
 
-    start_block = (68, 70, 30)
+    start_block = (STARTX, heights[STARTX, STARTZ], STARTZ)
 
     x_modifier = 1
     z_modifier = 1

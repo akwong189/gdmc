@@ -11,11 +11,13 @@ class Cardinals(Enum):
 VALS = {0: "west", 1: "north", 2: "east", 3: "south"}
 
 class NBTBuildings:
-    def __init__(self, nbt_path: str):
+    def __init__(self, nbt_path: str, y_offset=0):
+        self.path = nbt_path
         self.nbt = nbt.NBTFile(nbt_path, 'rb')
         self.pallete = self._retrieve_pallete()
         self.structure_3d = np.ndarray(shape=(self.get_size()), dtype=object)
         self.x, self.y, self.z = self.get_size()
+        self.y_offset = y_offset
         
         self._retrieve_blocks()
         
@@ -88,8 +90,10 @@ class NBTBuildings:
             if "facing" in data:
                 data = self._replace_facing(data, direction)
             
-            intf.placeBlock(x + _x, y + _y, z + _z, data)
+            intf.placeBlock(x + _x, y + _y - self.y_offset, z + _z, data)
         
+    def __str__(self):
+        return self.path
         
 if __name__ == "__main__":
     from gdpc import interface as INTF
