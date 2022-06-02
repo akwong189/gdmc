@@ -65,6 +65,10 @@ def generate_mask(x1, z1, x2, z2, height):
                 mask[x1+x,z1+z] = 2
             elif block == "minecraft:lava":
                 mask[x1+x,z1+z] = 4
+            elif block == "minecraft:grass_paths":
+                mask[x1+x,z1+z] = 3
+            elif block == "minecraft:oak_planks":
+                mask[x1+x,z1+z] = 3
     return mask
 
 if __name__ == "__main__":
