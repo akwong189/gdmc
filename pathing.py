@@ -55,8 +55,7 @@ def place_corner(corner_block):
 
     INTF.placeBlock(corner_block[x], heights[corner_block[x]][corner_block[z]] - 1, corner_block[z], block_type)
     
-def create_path(path_start_x, path_start_z, path_length, path_min, path_max):
-    heights = WORLDSLICE.heightmaps["MOTION_BLOCKING_NO_LEAVES"]
+def create_path(path_start_x, path_start_z, path_length, path_min, path_max, heights):
     start_block = (path_start_x, heights[path_start_x][path_start_z], path_start_z)
 
     #initialize modifier    
@@ -136,7 +135,7 @@ def create_path(path_start_x, path_start_z, path_length, path_min, path_max):
             #INTF.placeBlock(end_block[x], heights[end_block[x]][end_block[z]] - 1, end_block[z], "grass_path")
             #INTF.placeBlock(intermediate_block[x], heights[intermediate_block[x]][intermediate_block[z]] - 1, intermediate_block[z], "grass_path")
 
-            print(heights)
+            # print(heights)
             #reset start block in the same cardinal direction
             start_block = end_block
         

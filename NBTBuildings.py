@@ -81,16 +81,18 @@ class NBTBuildings:
         size = self.nbt["size"]
         return size[0].value, size[1].value, size[2].value
     
-    def place_structure(self, intf, x: int, y: int, z: int, direction: Cardinals=Cardinals.WEST):
+    def place(self, intf, x: int, y: int, z: int, direction: Cardinals=Cardinals.WEST):
         structure = self._cardinal_location(direction=direction)
         it =  np.nditer(structure, flags=['multi_index', "refs_ok"])
         for d in it:
             _x, _y, _z = it.multi_index
-            data = str(d)
-            if "facing" in data:
-                data = self._replace_facing(data, direction)
-            
-            intf.placeBlock(x + _x, y + _y - self.y_offset, z + _z, data)
+
+            if d not in ("None", None, ""):
+                data = str(d)
+                if "facing" in data:
+                    data = self._replace_facing(data, direction)
+                
+                intf.placeBlock(x + _x, y + _y - self.y_offset, z + _z, data)
         
     def __str__(self):
         return self.path

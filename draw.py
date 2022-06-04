@@ -1,9 +1,8 @@
 from math import sqrt
-from cv2 import cartToPolar
 import numpy as np
 from NBTBuildings import Cardinals, NBTBuildings
 from visualize import display_masked_map, generate_mask
-import random
+from gdpc import interface as INTF
 
 def closest_path(center, paths):
     closest = None
@@ -49,19 +48,26 @@ def draw_line(intf, start_x, start_z, end_x, end_z, heightmap, mask):
         
     return mask
         
-def place_structure(heightmap, mask, x, z, structure, pad=2, path_radius=4):
+def place_structure(heightmap, mask, x, z, structure, pad=2, path_radius=4, ignore_path=False):
         h_x, h_y, h_z = structure.get_size()
         location = heightmap[x : x + h_x, z : z + h_z]
-        # print(max(x - pad, 0), min(x + h_x + pad, h_x), max(z - pad, 0), min(z + h_z + pad, h_z))
         check_mask  = mask[max(x - pad, 0) : x + h_x + pad, max(z - pad, 0) : z + h_z + pad]
         path_mask = mask[x - path_radius : x + h_x + path_radius, z - path_radius : z + h_z + path_radius]
         
+        if ignore_path:
+            structure.place(
+                INTF, x, location.min(), z
+            )
+            mask[x - pad : x + h_x + pad, z - pad : z + h_z + pad] = 5
+            mask[x : x + h_x , z : z + h_z] = 1
+            return True
+
         has_path = (path_mask == 3).nonzero()
         if len(has_path[0]) == len(has_path[1]) == 0:
-            return
+            return False
             
         paths = np.column_stack(has_path)
-            
+
         if (
             location.shape == (h_x, h_z)
             and location.max() == location.min()
@@ -76,15 +82,16 @@ def place_structure(heightmap, mask, x, z, structure, pad=2, path_radius=4):
             cardinal = closest_path([middle_x, middle_z], paths)
             
             print(f"Placing {structure}")
-            structure.place_structure(
+            structure.place(
                 INTF, x, location.min(), z, cardinal
             )
             
             mask[x - pad : x + h_x + pad, z - pad : z + h_z + pad] = 5
             mask[x : x + h_x , z : z + h_z] = 1
+            return True
+        return False
         
 if __name__ == "__main__":
-    from gdpc import interface as INTF
     from gdpc import worldLoader as WL
     
     STARTX, STARTY, STARTZ, ENDX, ENDY, ENDZ = INTF.requestBuildArea()  # BUILDAREA

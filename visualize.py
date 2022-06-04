@@ -1,3 +1,4 @@
+from multiprocessing import Pool
 from PIL import Image
 import numpy as np
 from gdpc import interface as INTF
@@ -12,6 +13,18 @@ COLOR_VALUES = {
     5: (100, 0, 0), # do not build zone
     6: (47, 249, 148), # do not build zone for lamps/roads
 }
+
+class BlockInfo:
+    def __init__(self, x, z, value):
+        self.x = x
+        self.z = z
+        self.value = value
+    
+    def get(self):
+        return self.x, self.z, self.value
+
+    def __str__(self):
+        return f"({self.x} {self.y} {self.z})"
 
 def draw_pixel(img, x1, z1, x2, z2, color):
     for x in range(x1, x2):
@@ -55,21 +68,38 @@ def display_masked_map(heightmap, mask):
 def generate_heightmap(min_height, max_height, size=(256, 256)):
     return np.random.uniform(low=min_height, high=max_height, size=size).astype(int)
 
+def _read_block(pos):
+    x, y, z = pos
+    block = INTF.getBlock(x, y, z)
+    val = 0
+
+    if block == "minecraft:water":
+        val = 2
+    elif block == "minecraft:lava":
+        val = 4
+    elif block == "minecraft:grass_path":
+        val = 3
+    elif block == "minecraft:oak_plank":
+        val = 3
+    return BlockInfo(x, z, val)
+
 def generate_mask(x1, z1, x2, z2, height):
-    mask = np.zeros(shape=height.shape)
-    
-    for x in range(x2 - x1):
-        for z in range(z2 - z1):
-            block = INTF.getBlock(x, height[x,z]-1, z)
-            if block == "minecraft:water":
-                mask[x1+x,z1+z] = 2
-            elif block == "minecraft:lava":
-                mask[x1+x,z1+z] = 4
-            elif block == "minecraft:grass_paths":
-                mask[x1+x,z1+z] = 3
-            elif block == "minecraft:oak_planks":
-                mask[x1+x,z1+z] = 3
-    return mask
+    with Pool() as pool:
+        mask = np.zeros(shape=height.shape)
+        check_area = []
+
+        for x in range(x2 - x1):
+            for z in range(z2 - z1):
+                check_area.append((x, height[x, z]-1, z))
+
+        data = pool.map(_read_block, check_area)
+
+        for d in data:
+            if d is not None:
+                x, z, val = d.get()
+                mask[x, z] = val
+                    
+        return mask
 
 if __name__ == "__main__":
     from gdpc import toolbox as TB
