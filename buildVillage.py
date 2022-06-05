@@ -8,7 +8,10 @@ import numpy as np
 import glob
 
 from visualize import generate_mask, display_masked_map
-from draw import place_structure
+from draw import draw_line, place_structure
+from placeVillagers import summon_villagers
+
+from random import randint
 
 console = Console()
 
@@ -110,6 +113,8 @@ if __name__ == "__main__":
                         pad=1,
                     ):
                         break
+        
+        summon_villagers((STARTX + center_x - x//2), (STARTZ + center_z - z//2))
 
         img = display_masked_map(heights, mask)
         img.show()
