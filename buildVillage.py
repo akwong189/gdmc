@@ -1,3 +1,4 @@
+from http.client import ImproperConnectionState
 from NBTBuildings import NBTBuildings
 from pathing import create_path
 from gdpc import interface as INTF
@@ -7,6 +8,9 @@ import numpy as np
 
 from visualize import generate_mask, display_masked_map
 from draw import draw_line, place_structure
+from placeVillagers import summon_villagers
+
+from random import randint
 
 console = Console()
 
@@ -54,22 +58,14 @@ if __name__ == "__main__":
         mask = generate_mask(STARTX, STARTZ, ENDX, ENDZ, heights)
         console.log("Created Mask")
 
-        well = NBTBuildings("./villages/plains/town_centers/plains_meeting_point_1.nbt", y_offset=1)
+        well = NBTBuildings("./well.nbt", y_offset=1)
         x, _, z = well.get_size()
 
         place_structure(heightmap=heights, mask=mask, x=STARTX + center_x - x//2, z= STARTZ + center_z - z//2, structure=well, ignore_path=True)
         console.log(f"Placing Well at {STARTX + center_x - x//2} {heights[center_x - x//2, center_z - x//2]} {STARTZ + center_z - z//2}")
 
         # place house
-        houses = [NBTBuildings("./villages/plains/houses/plains_small_house_1.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_2.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_3.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_4.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_5.nbt", 1),
-              NBTBuildings("./villages/plains/houses/plains_small_house_6.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_7.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_8.nbt", 2),
-              NBTBuildings("./villages/plains/houses/plains_medium_house_1.nbt", 1)]
+        houses = [NBTBuildings("./simple_house.nbt")]
 
         np.random.shuffle(houses)
         
@@ -77,6 +73,8 @@ if __name__ == "__main__":
             for z in range(5, z_max):
                 house = np.random.choice(houses)
                 place_structure(heightmap=heights, mask=mask, x=STARTX+x, z=STARTZ+z, structure=house, path_radius=3)
+        
+        summon_villagers((STARTX + center_x - x//2), (STARTZ + center_z - z//2))
 
         img = display_masked_map(heights, mask)
         img.show()
