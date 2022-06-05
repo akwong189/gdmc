@@ -1,14 +1,20 @@
+from time import sleep
 from NBTBuildings import NBTBuildings
 from pathing import create_path
 from gdpc import interface as INTF
 from gdpc import worldLoader as WL
 from rich.console import Console
 import numpy as np
+import glob
 
 from visualize import generate_mask, display_masked_map
-from draw import draw_line, place_structure
+from draw import place_structure
 
 console = Console()
+
+def get_plains_buildings(path="./villages/plains/houses"):
+    return glob.glob(f"{path}/*.nbt")
+
 
 if __name__ == "__main__":
     # args -> xcoord of start block, ycoord of start block, iterations per path, path min, path max
@@ -21,7 +27,9 @@ if __name__ == "__main__":
     -if the path goes out of play area it crashes
     """
 
-    with console.status("[bold green]Procedural village generation in progress...") as status:
+    with console.status(
+        "[bold green]Procedural village generation in progress..."
+    ) as status:
         STARTX, STARTY, STARTZ, ENDX, ENDY, ENDZ = INTF.requestBuildArea()  # BUILDAREA
 
         for x in range(STARTX, ENDX):
@@ -34,7 +42,9 @@ if __name__ == "__main__":
         console.log("Created border")
 
         intf = INTF.Interface(STARTX, STARTY, STARTZ, caching=True)
-        WORLDSLICE = WL.WorldSlice(STARTX, STARTZ, ENDX + 1, ENDZ + 1)  # this takes a while
+        WORLDSLICE = WL.WorldSlice(
+            STARTX, STARTZ, ENDX + 1, ENDZ + 1
+        )  # this takes a while
         heights = WORLDSLICE.heightmaps["MOTION_BLOCKING_NO_LEAVES"]
 
         x_max, z_max = heights.shape
@@ -44,39 +54,62 @@ if __name__ == "__main__":
         create_path(
             path_start_x=STARTX + center_x,
             path_start_z=STARTZ + center_z,
-            path_length=5,
-            path_min=4,
+            path_length=7,
+            path_min=5,
             path_max=10,
             heights=heights,
         )
         console.log("Created paths")
 
+        # mask = np.zeros(shape=heights.shape)
         mask = generate_mask(STARTX, STARTZ, ENDX, ENDZ, heights)
         console.log("Created Mask")
 
-        well = NBTBuildings("./villages/plains/town_centers/plains_meeting_point_1.nbt", y_offset=1)
+        well = NBTBuildings(
+            "./villages/plains/town_centers/plains_meeting_point_1.nbt", y_offset=1
+        )
         x, _, z = well.get_size()
 
-        place_structure(heightmap=heights, mask=mask, x=STARTX + center_x - x//2, z= STARTZ + center_z - z//2, structure=well, ignore_path=True)
-        console.log(f"Placing Well at {STARTX + center_x - x//2} {heights[center_x - x//2, center_z - x//2]} {STARTZ + center_z - z//2}")
+        sleep(0.5)
+        place_structure(
+            heightmap=heights,
+            mask=mask,
+            x=STARTX + center_x - x // 2,
+            z=STARTZ + center_z - z // 2,
+            structure=well,
+            ignore_path=True,
+            pad=1
+        )
+        sleep(0.5)
+        console.log(
+            f"Placing Well at {STARTX + center_x - x//2} {heights[center_x - x//2, center_z - x//2]} {STARTZ + center_z - z//2}"
+        )
 
         # place house
-        houses = [NBTBuildings("./villages/plains/houses/plains_small_house_1.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_2.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_3.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_4.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_5.nbt", 1),
-              NBTBuildings("./villages/plains/houses/plains_small_house_6.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_7.nbt"),
-              NBTBuildings("./villages/plains/houses/plains_small_house_8.nbt", 2),
-              NBTBuildings("./villages/plains/houses/plains_medium_house_1.nbt", 1)]
+        houses = []
+        for h in get_plains_buildings():
+            if h in ("./villages/plains/houses/plains_small_house_5.nbt", "./villages/plains/houses/plains_medium_house_1.nbt"):
+                houses.append(NBTBuildings(h, 1))
+            elif h in ("./villages/plains/houses/plains_small_house_8.nbt"):
+                houses.append(NBTBuildings(h, 2))
+            else:
+                houses.append(NBTBuildings(h))
 
-        np.random.shuffle(houses)
-        
         for x in range(5, x_max):
             for z in range(5, z_max):
-                house = np.random.choice(houses)
-                place_structure(heightmap=heights, mask=mask, x=STARTX+x, z=STARTZ+z, structure=house, path_radius=3)
+                np.random.shuffle(houses)
+
+                for house in houses:
+                    if place_structure(
+                        heightmap=heights,
+                        mask=mask,
+                        x=STARTX + x,
+                        z=STARTZ + z,
+                        structure=house,
+                        path_radius=3,
+                        pad=1,
+                    ):
+                        break
 
         img = display_masked_map(heights, mask)
         img.show()

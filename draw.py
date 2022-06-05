@@ -112,17 +112,23 @@ if __name__ == "__main__":
               NBTBuildings("./villages/plains/houses/plains_small_house_6.nbt"),
               NBTBuildings("./villages/plains/houses/plains_small_house_7.nbt"),
               NBTBuildings("./villages/plains/houses/plains_small_house_8.nbt", 2),
-              NBTBuildings("./villages/plains/houses/plains_medium_house_1.nbt", 1)]
+              NBTBuildings("./villages/plains/houses/plains_medium_house_1.nbt", 1),
+              NBTBuildings("./villages/plains/houses/plains_library_2.nbt")]
     np.random.shuffle(houses)
-    print(houses)
+    # print(houses)
     
-    mask = generate_mask(STARTX, STARTZ, ENDX+1, ENDZ+1, heights)
-    mask = draw_line(INTF, STARTX, STARTZ, ENDX, ENDZ, heights, mask)    
+    mask = np.zeros(shape=heights.shape)
+    # mask = generate_mask(STARTX, STARTZ, ENDX+1, ENDZ+1, heights)
+    mask = draw_line(INTF, STARTX, STARTZ, ENDX, ENDZ, heights, mask)  
+    done = False  
     
     for x in range(5, x_max):
         for z in range(5, z_max):
-            house = np.random.choice(houses)
-            place_structure(heightmap=heights, mask=mask, x=STARTX+x, z=STARTZ+z, structure=house)
+            if place_structure(heightmap=heights, mask=mask, x=STARTX+x, z=STARTZ+z, structure=NBTBuildings("./villages/plains/houses/plains_library_1.nbt")):
+                done = True
+                break
+        if done:
+            break
     
     img = display_masked_map(heights, mask)
     img.show()
