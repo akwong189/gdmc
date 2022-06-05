@@ -88,7 +88,7 @@ def create_path(path_start_x, path_start_z, path_length, path_min, path_max, hei
             #check to see if pathing end blocks will be too high up/down low
             breakCheck = False
             for j in range(100):
-                if (abs((heights[end_block_x][end_block_z]) - (heights[end_block_x][start_block[z]])) > 2 or abs((heights[end_block_x][start_block[z]]) - start_block[y]) > 2):
+                if ((end_block_x > ENDX - 10 or end_block_x < STARTX + 10 or end_block_z > ENDZ - 10 or end_block_z < STARTZ + 10) or abs((heights[end_block_x][end_block_z]) - (heights[end_block_x][start_block[z]])) > 2 or abs((heights[end_block_x][start_block[z]]) - start_block[y]) > 2):
                     x_distance = randint(4, 10)
                     z_divergence_diff = randint(-x_distance, x_distance)
                     end_block_x = (start_block[x] + (x_distance * x_modifier))
