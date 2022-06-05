@@ -26,7 +26,7 @@ def summon_villagers(x_loc, z_loc):
     start_time = time.time()
     interval = 2
     for i in range(100):
-        time.sleep(start_time + i*interval - time.time())
+        # time.sleep(start_time + i*interval - time.time())
         currentTime = INTF.runCommand("time query gametime")
         try:
             if int(currentTime) - 200 > int(gametime) and not flag1:

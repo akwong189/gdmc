@@ -64,7 +64,7 @@ if __name__ == "__main__":
         )
         console.log("Created paths")
 
-        # mask = np.zeros(shape=heights.shape)
+        mask = np.zeros(shape=heights.shape)
         mask = generate_mask(STARTX, STARTZ, ENDX, ENDZ, heights)
         console.log("Created Mask")
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         )
         x, _, z = well.get_size()
 
-        sleep(0.5)
+        sleep(1)
         place_structure(
             heightmap=heights,
             mask=mask,
@@ -83,7 +83,7 @@ if __name__ == "__main__":
             ignore_path=True,
             pad=1
         )
-        sleep(0.5)
+        sleep(1.5)
         console.log(
             f"Placing Well at {STARTX + center_x - x//2} {heights[center_x - x//2, center_z - x//2]} {STARTZ + center_z - z//2}"
         )
@@ -98,10 +98,10 @@ if __name__ == "__main__":
             else:
                 houses.append(NBTBuildings(h))
 
+        sleep(1)
         for x in range(5, x_max):
             for z in range(5, z_max):
                 np.random.shuffle(houses)
-
                 for house in houses:
                     if place_structure(
                         heightmap=heights,

@@ -50,7 +50,7 @@ class NBTBuildings:
             if b.get("nbt") != None and b.get("nbt").get("final_state") != None:
                 block = b.get("nbt")["final_state"].value.replace("minecraft:", "")
 
-                if b.get("nbt")["name"] == "minecraft:building_entrance":
+                if b.get("nbt")["name"].value == "minecraft:building_entrance":
                     self.y_offset = y
 
                 if "structure_void" in block:

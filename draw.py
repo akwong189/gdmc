@@ -80,6 +80,9 @@ def place_structure(heightmap, mask, x, z, structure, pad=2, path_radius=4, igno
             middle_z = middle_z // 2
             
             cardinal = closest_path([middle_x, middle_z], paths)
+
+            if cardinal not in (Cardinals.NORTH, Cardinals.SOUTH) and h_x != h_z:
+                return False
             
             print(f"Placing {structure}")
             structure.place(

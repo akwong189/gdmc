@@ -1,7 +1,7 @@
 from multiprocessing import Pool
 from PIL import Image
 import numpy as np
-# from gdpc import interface as INTF
+from gdpc import interface as INTF
 
 PX_SIZE = 4
 
