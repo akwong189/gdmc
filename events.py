@@ -6,6 +6,17 @@ import eventSystem
 import time
 
 def summon_entities(eventSystem, eventName, location, minDist, maxDist, entName, numEnt):
+    """Summon certain entities and send information to the event system.
+
+    Args:
+        eventSystem (eventManager): system handling the events to be executed
+        eventName (str): event to be executed. Ex: "summon_villagers"
+        location ((int, int, int)): tuple of base x, y, and z coordinates to summon entities
+        minDist (int): minimum distance away from the base location to summon entities
+        maxDist (int): maximum distance away from the base location to summon entities
+        entName (str): entity to be summoned. Ex: "villager"
+        numEnt (int): number of entities to be summoned
+    """
     #populate with n villagers
     for f in range(numEnt):
         if eventName == "summon_lightning":

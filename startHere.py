@@ -1,4 +1,5 @@
 #! /usr/bin/python3
+#file used in development stages
 """### Generate a simple example village.
 This file contains a comprehensive collection of functions designed
 to introduce new coders to the GDMC HTTP client in Python.
