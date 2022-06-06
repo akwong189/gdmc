@@ -2,6 +2,19 @@
 
 ## Adley Wong, Ben Cornel, Deon Lillo, Martin Jiang
 ## Cal Poly CSC 570 - Professor Rodrigo Cannan
+
+
+---
+## Features
+- GDPC http client
+- Generative Structure placement based on a masking system
+- Random pathing algorithm
+- Masking for water, lava, and paths
+- Structure padding, path location
+- Structure rotation
+- Height map and masking visualization tool
+- Border visualization
+
 ---
 ## Requirements
 The code requires the use of minecraft data files, particularly the `village` nbt files that are packaged with Minecraft.jar. Provided the EULA, we cannot provide explicitly the files within the repository. The steps to retrieve those files are provided.
@@ -52,4 +65,3 @@ This ensures that the code will know where the provided NBT files are located
 ---
 ## Resources
 + [GDPC 5.0 (Manicule)](https://github.com/nilsgawlik/gdmc_http_client_python)
-+ 
