@@ -44,5 +44,5 @@ This ensures that the code will know where the provided NBT files are located
 
 ---
 ## Resources
-+ 
++ [GDPC 5.0 (Manicule)](https://github.com/nilsgawlik/gdmc_http_client_python)
 + 
