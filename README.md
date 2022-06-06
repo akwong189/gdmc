@@ -20,10 +20,17 @@ This ensures that the code will know where the provided NBT files are located
 
 ---
 ## Installation
+1. Install the required NBT files from minecraft, either as described in [Requirements](#requirements) or using the script
+```
+./grab.sh
+```
+
+2. Install python dependencies
 ```
 > pip install -r requirements.txt
 ```
 
+---
 ## Run
 ```
 > python buildVillage.py
