@@ -4,7 +4,17 @@ from NBTBuildings import Cardinals, NBTBuildings
 from visualize import display_masked_map, generate_mask
 from gdpc import interface as INTF
 
+# determine the closest path to the center of the structure
 def closest_path(center, paths):
+    """determine the closest path from the center
+
+    Args:
+        center ((int, int)): Center location for the structure
+        paths ([(int, int)]): List of path block in (x, z)
+
+    Returns:
+        Cardinal: Cardinal direction that the structure should face
+    """
     closest = None
     loc = None
     
@@ -16,6 +26,15 @@ def closest_path(center, paths):
     return to_cardinal(loc, center)
 
 def to_cardinal(points, center):    
+    """Convert points to cardinal direction
+
+    Args:
+        points ((int, int)): Point where the path is location
+        center ((int, int)): Center point
+
+    Returns:
+        Cardinal: Cardinal direction that the point is facing
+    """
     deg = np.rad2deg(np.arctan2(points[1] - center[1], points[0] - center[0]))
     
     if -45 <= deg <= 45:
@@ -29,6 +48,20 @@ def to_cardinal(points, center):
         
 
 def draw_line(intf, start_x, start_z, end_x, end_z, heightmap, mask):
+    """Draw a straight line
+
+    Args:
+        intf (INTF): GDPC minecraft interface
+        start_x (int): Starting X location
+        start_z (int): Starting Z location
+        end_x (int): Ending X location
+        end_z (int): Ending Z location
+        heightmap ([int]): numpy array of heights
+        mask ([int]): numpy array for mask
+
+    Returns:
+        mask: numpy array for mask with straight roads
+    """
     x_path = 64
     
     for i in range(128):
@@ -49,50 +82,64 @@ def draw_line(intf, start_x, start_z, end_x, end_z, heightmap, mask):
     return mask
         
 def place_structure(heightmap, mask, x, z, structure, pad=2, path_radius=4, ignore_path=False):
-        h_x, h_y, h_z = structure.get_size()
-        location = heightmap[x : x + h_x, z : z + h_z]
-        check_mask  = mask[max(x - pad, 0) : x + h_x + pad, max(z - pad, 0) : z + h_z + pad]
-        path_mask = mask[x - path_radius : x + h_x + path_radius, z - path_radius : z + h_z + path_radius]
-        
-        if ignore_path:
-            structure.place(
-                INTF, x, location.min(), z
-            )
-            mask[x - pad : x + h_x + pad, z - pad : z + h_z + pad] = 5
-            mask[x : x + h_x , z : z + h_z] = 1
-            return True
+    """Given a structure and location, determine if it can be placed at that location
 
-        has_path = (path_mask == 3).nonzero()
-        if len(has_path[0]) == len(has_path[1]) == 0:
-            return False
-            
-        paths = np.column_stack(has_path)
+    Args:
+        heightmap ([int]): Height map numpy array
+        mask ([int]): Mask for generation
+        x (int): starting X location
+        z (int): starting Z location
+        structure (NBTBuilding): nbt building class
+        pad (int, optional): Building padding to deter too close generation. Defaults to 2.
+        path_radius (int, optional): radius to find if a path exists. Defaults to 4.
+        ignore_path (bool, optional): ignore the path requirement. Defaults to False.
 
-        if (
-            location.shape == (h_x, h_z)
-            and location.max() == location.min()
-            and check_mask.max() == 0
-            and check_mask.min() == 0
-        ):
-            
-            middle_x, middle_z = path_mask.shape
-            middle_x = middle_x // 2    
-            middle_z = middle_z // 2
-            
-            cardinal = closest_path([middle_x, middle_z], paths)
+    Returns:
+        bool: if a building can be generated (True) else (False)
+    """
+    h_x, h_y, h_z = structure.get_size()
+    location = heightmap[x : x + h_x, z : z + h_z]
+    check_mask  = mask[max(x - pad, 0) : x + h_x + pad, max(z - pad, 0) : z + h_z + pad]
+    path_mask = mask[x - path_radius : x + h_x + path_radius, z - path_radius : z + h_z + path_radius]
+    
+    if ignore_path:
+        structure.place(
+            INTF, x, location.min(), z
+        )
+        mask[x - pad : x + h_x + pad, z - pad : z + h_z + pad] = 5
+        mask[x : x + h_x , z : z + h_z] = 1
+        return True
 
-            if cardinal not in (Cardinals.NORTH, Cardinals.SOUTH) and h_x != h_z:
-                return False
-            
-            print(f"Placing {structure}")
-            structure.place(
-                INTF, x, location.min(), z, cardinal
-            )
-            
-            mask[x - pad : x + h_x + pad, z - pad : z + h_z + pad] = 5
-            mask[x : x + h_x , z : z + h_z] = 1
-            return True
+    has_path = (path_mask == 3).nonzero()
+    if len(has_path[0]) == len(has_path[1]) == 0:
         return False
+        
+    paths = np.column_stack(has_path)
+
+    if (
+        location.shape == (h_x, h_z)
+        and location.max() == location.min()
+        and check_mask.max() == 0
+        and check_mask.min() == 0
+    ):
+        middle_x, middle_z = path_mask.shape
+        middle_x = middle_x // 2    
+        middle_z = middle_z // 2
+        
+        cardinal = closest_path([middle_x, middle_z], paths)
+
+        if cardinal not in (Cardinals.NORTH, Cardinals.SOUTH) and h_x != h_z:
+            return False
+        
+        print(f"Placing {structure}")
+        structure.place(
+            INTF, x, location.min(), z, cardinal
+        )
+        
+        mask[x - pad : x + h_x + pad, z - pad : z + h_z + pad] = 5
+        mask[x : x + h_x , z : z + h_z] = 1
+        return True
+    return False
         
 if __name__ == "__main__":
     from gdpc import worldLoader as WL

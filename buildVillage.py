@@ -16,9 +16,26 @@ from random import randint
 console = Console()
 
 def get_plains_buildings(path="./villages/plains/houses"):
+    """Glob the plains building nbt from path
+
+    Args:
+        path (str, optional): path to buildings. Defaults to "./villages/savanna/houses".
+
+    Returns:
+        list: list of nbt paths
+    """
     return glob.glob(f"{path}/*.nbt")
 
-def get_plains_buildings(path="./villages/savanna/houses"):
+
+def get_savanna_buildings(path="./villages/savanna/houses"):
+    """Glob the savanna building nbt from path
+
+    Args:
+        path (str, optional): path to buildings. Defaults to "./villages/savanna/houses".
+
+    Returns:
+        list: list of nbt paths
+    """
     return glob.glob(f"{path}/*.nbt")
 
 
@@ -38,6 +55,7 @@ if __name__ == "__main__":
     ) as status:
         STARTX, STARTY, STARTZ, ENDX, ENDY, ENDZ = INTF.requestBuildArea()  # BUILDAREA
 
+        # Generate a border around build area
         for x in range(STARTX, ENDX):
             INTF.placeBlock(x, 128, STARTZ, "cobblestone")
             INTF.placeBlock(x, 128, ENDZ, "cobblestone")
@@ -57,6 +75,7 @@ if __name__ == "__main__":
         center_x = (ENDX - STARTX) // 2
         center_z = (ENDZ - STARTZ) // 2
 
+        # generate paths
         create_path(
             path_start_x=STARTX + center_x,
             path_start_z=STARTZ + center_z,
@@ -67,10 +86,11 @@ if __name__ == "__main__":
         )
         console.log("Created paths")
 
-        mask = np.zeros(shape=heights.shape)
+        # mask = np.zeros(shape=heights.shape)
         mask = generate_mask(STARTX, STARTZ, ENDX, ENDZ, heights)
         console.log("Created Mask")
 
+        # insert town center
         well = NBTBuildings(
             "./villages/plains/town_centers/plains_meeting_point_1.nbt", y_offset=1
         )
@@ -91,7 +111,7 @@ if __name__ == "__main__":
             f"Placing Well at {STARTX + center_x - x//2} {heights[center_x - x//2, center_z - x//2]} {STARTZ + center_z - z//2}"
         )
 
-        # place house
+        # place houses
         houses = []
         for h in get_plains_buildings():
             houses.append(NBTBuildings(h))
@@ -114,5 +134,6 @@ if __name__ == "__main__":
         
         summon_villagers((STARTX + center_x - x//2), (STARTZ + center_z - z//2))
 
+        # display visualizations        
         img = display_masked_map(heights, mask)
         img.show()
