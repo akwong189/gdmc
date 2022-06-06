@@ -18,6 +18,9 @@ console = Console()
 def get_plains_buildings(path="./villages/plains/houses"):
     return glob.glob(f"{path}/*.nbt")
 
+def get_plains_buildings(path="./villages/savanna/houses"):
+    return glob.glob(f"{path}/*.nbt")
+
 
 if __name__ == "__main__":
     # args -> xcoord of start block, ycoord of start block, iterations per path, path min, path max
@@ -91,12 +94,7 @@ if __name__ == "__main__":
         # place house
         houses = []
         for h in get_plains_buildings():
-            if h in ("./villages/plains/houses/plains_small_house_5.nbt", "./villages/plains/houses/plains_medium_house_1.nbt"):
-                houses.append(NBTBuildings(h, 1))
-            elif h in ("./villages/plains/houses/plains_small_house_8.nbt"):
-                houses.append(NBTBuildings(h, 2))
-            else:
-                houses.append(NBTBuildings(h))
+            houses.append(NBTBuildings(h))
 
         sleep(1)
         for x in range(5, x_max):
