@@ -18,11 +18,18 @@ heights = WORLDSLICE.heightmaps["MOTION_BLOCKING_NO_LEAVES"]
 
 ROADHEIGHT = 0
 
+#indexes to use when dereferencing 3D coordinates
 x = 0
 y = 1
 z = 2
 
 def place_blocks_x(intermediate_block, start_block):
+    """Place blocks in the x direction
+
+    Args:
+        intermediate_block ((int, int, int)): tuple for the 3D coordinates of the block in the middle of the L path
+        start_block ((int, int, int)): tuple for the 3D coordinates of the block at the start of the L path
+    """
     x_delt = intermediate_block[x] - start_block[x]
     x_mag = abs(x_delt)
 
@@ -35,6 +42,12 @@ def place_blocks_x(intermediate_block, start_block):
             INTF.placeBlock(start_block[x] + (1 * (int)(x_delt / x_mag)) + (i * (int)(x_delt / x_mag)), y_placement, start_block[z], "grass_path")
 
 def place_blocks_z(intermediate_block, end_block):
+    """Place blocks in the z direction
+
+    Args:
+        intermediate_block ((int, int, int)): tuple for the 3D coordinates of the block in the middle of the L path
+        end_block ((int, int, int)): tuple for the 3D coordinates of the block at the end of the L path
+    """
     z_delt = end_block[z] - intermediate_block[z]
     z_mag = abs(z_delt)
     
@@ -47,15 +60,31 @@ def place_blocks_z(intermediate_block, end_block):
             INTF.placeBlock(intermediate_block[x], y_placement, (intermediate_block[z] + (1 * (int)(z_delt / z_mag))) + (j * (int)(z_delt / z_mag)), "grass_path")
         
 def place_corner(corner_block):
+    """Places a block where the path can pivot (start, intermediate, or end block)
+
+    Args:
+        corner_block ((int, int, int)): tuple for the 3D coordinates of the block to be placed
+    """
     block_type = "grass_path" #default path type
 
-    #check for water or oak
+    #check for water or oak planks since oak plank paths get placed over water
     if INTF.getBlock(corner_block[x], heights[corner_block[x]][corner_block[z]] - 1, corner_block[z]) == "minecraft:water" or INTF.getBlock(corner_block[x], heights[corner_block[x]][corner_block[z]] - 1, corner_block[z]) == "minecraft:oak_planks":
         block_type = "oak_planks"
 
     INTF.placeBlock(corner_block[x], heights[corner_block[x]][corner_block[z]] - 1, corner_block[z], block_type)
     
 def create_path(path_start_x, path_start_z, path_length, path_min, path_max, heights):
+    """Creates a path that is a couple blocks wide and extends out in 4 different directions.
+       Can specify how far out the paths are to be extended.
+
+    Args:
+        path_start_x (int): x coordinate for the starting block
+        path_start_z (int): z coordinate for the starting block
+        path_length (int): number of L paths to be extended in each direction
+        path_min (int): lower bound for size of L path components
+        path_max (int): upper bound for size of L path components
+        heights (2d matrix): heightmap of the build area
+    """
     start_block = (path_start_x, heights[path_start_x][path_start_z], path_start_z)
 
     #initialize modifier    
@@ -130,12 +159,6 @@ def create_path(path_start_x, path_start_z, path_length, path_min, path_max, hei
             place_blocks_x(second_start, second_intermediate)
             place_blocks_z(second_intermediate, second_end)
 
-            #temp
-            #INTF.placeBlock(start_block[x], heights[start_block[x]][start_block[z]] - 1, start_block[z], "grass_path")
-            #INTF.placeBlock(end_block[x], heights[end_block[x]][end_block[z]] - 1, end_block[z], "grass_path")
-            #INTF.placeBlock(intermediate_block[x], heights[intermediate_block[x]][intermediate_block[z]] - 1, intermediate_block[z], "grass_path")
-
-            # print(heights)
             #reset start block in the same cardinal direction
             start_block = end_block
         

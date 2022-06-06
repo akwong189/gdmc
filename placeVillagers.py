@@ -1,3 +1,4 @@
+#file used in development stages
 from random import randint
 from gdpc import interface as INTF
 from gdpc import worldLoader as WL
@@ -12,10 +13,39 @@ def summon_villagers(x_loc, z_loc):
     for f in range(5):
         firstRand = randint(-4, 4)
         secondRand = randint(-4, 4)
-        INTF.runCommand("summon villager {} {} {}".format(x_loc + firstRand, heights[x_loc + firstRand][z_loc + secondRand], z_loc + secondRand))
+        INTF.runCommand("summon villager {} {} {}".format(x_loc + firstRand + f, heights[x_loc + firstRand + f][z_loc + secondRand + f], z_loc + secondRand + f))
+
+    INTF.runCommand("tellraw @a {\"text\":\"\",\"extra\":[{\"text\":\"Craig the Villager: What a day to be alive...\",\"color\":\"aqua\",\"bold\":\"true\"}]}")
+    time.sleep(5)
+    INTF.runCommand("tellraw @a {\"text\":\"\",\"extra\":[{\"text\":\"Sarah the Villager: I was thinking the same thing, Craig!\",\"color\":\"yellow\",\"bold\":\"true\"}]}")
     '''INTF.runCommand("summon husk 79 5 71")
     INTF.runCommand("tellraw @a {\"text\":\"\",\"extra\":[{\"text\":\"Hi There!\",\"color\":\"aqua\",\"bold\":\"true\"}]}")
     INTF.runCommand("summon minecraft:lightning_bolt 79 5 71")'''
+
+def summon_husks(x_loc, z_loc):
+    for f in range(5):
+        firstRand = randint(-10, 10)
+        secondRand = randint(-10, 10)
+        INTF.runCommand("summon husk {} {} {}".format(x_loc + firstRand + f, heights[x_loc + firstRand + f][z_loc + secondRand + f], z_loc + secondRand + f))
+    
+    INTF.runCommand("tellraw @a {\"text\":\"\",\"extra\":[{\"text\":\"Sarah the Villager: Are those... husks!??!\",\"color\":\"yellow\",\"bold\":\"true\"}]}")
+    time.sleep(2)
+    INTF.runCommand("tellraw @a {\"text\":\"\",\"extra\":[{\"text\":\"Jenny the Villager: RUN AWAY!!\",\"color\":\"green\",\"bold\":\"true\"}]}")
+    time.sleep(2)
+    INTF.runCommand("tellraw @a {\"text\":\"\",\"extra\":[{\"text\":\"John the Villager: I'm too young to die!!\",\"color\":\"red\",\"bold\":\"true\"}]}")
+
+def summon_lightning(x_loc, z_loc):
+    for f in range(10):
+        firstRand = randint(-10, 10)
+        secondRand = randint(-10, 10)
+        INTF.runCommand("summon minecraft:lightning_bolt {} {} {}".format(x_loc + firstRand + f, heights[x_loc + firstRand + f][z_loc + secondRand + f], z_loc + secondRand + f))
+        time.sleep(1)
+        if f == 1:
+            INTF.runCommand("tellraw @a {\"text\":\"\",\"extra\":[{\"text\":\"Rebecca the Villager: Oh no, that's lightning!\",\"color\":\"blue\",\"bold\":\"true\"}]}")
+        elif f == 3:
+            INTF.runCommand("tellraw @a {\"text\":\"\",\"extra\":[{\"text\":\"Craig the Villager: I hope my house doesn't catch on fire!\",\"color\":\"aqua\",\"bold\":\"true\"}]}")
+
+def event():
     #init game time
     gametime = INTF.runCommand("time query gametime")
     #init day time
@@ -42,4 +72,9 @@ def summon_villagers(x_loc, z_loc):
             print("fail!")
 
 if __name__ == "__main__":
+    print(WORLDSLICE.getBiomeAt(70, 70, 70))
     summon_villagers(70, 70)
+    time.sleep(5)
+    summon_husks(70, 70)
+    time.sleep(5)
+    summon_lightning(70, 70)
